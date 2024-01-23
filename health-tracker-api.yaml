@@ -1,0 +1,284 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Health Tracker API
+  description: This API provides endpoints for handling CRUD operations on the Health Tracker data.
+  contact:
+    name: Renu P Peter
+    email: renuppeter19@gmail.com
+paths:
+  /api/users:
+    get:
+      responses:
+        200:
+          description: This is a list of the users in the app
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+    post:
+      description: Add a user to the app
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              $ref: '#/components/schemas/User' 
+      responses:
+         200:
+           description: The user has been created  
+  /api/users/{user-id}:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/UserIdPath'
+      responses:
+        200:
+          description: This is a specifc user in the app
+          content: 
+            application/json:
+              schema:
+                type: object
+                $ref: '#/components/schemas/User'
+    patch:
+      summary: Update user details
+      description: Update specific user information based on the provided user ID.
+      parameters:
+        - name: user-id
+          in: path
+          description: User's unique identifier
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: User details to be updated
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: User details updated successfully
+        '404':
+          description: User not found
+        '500':
+          description: Internal server error
+    delete:
+      description: delete a user
+      operationId: deleteUser
+      parameters:
+        - $ref: '#/components/parameters/UserIdPath'
+      responses:
+        '400':
+          description: Invalid pet value
+  /api/users/email/{email}:
+    get:
+      summary: Retrieve user details by email
+      description: Get user information based on the provided email address.
+      parameters:
+        - name: email
+          in: path
+          description: User's email address
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid email supplied
+        '404':
+          description: User not found
+  /api/users/{email}:
+    get:
+      description: Get user by email
+      operationId: getUserByName
+      parameters:
+        - name: email
+          in: path
+          description: 'The email that needs to be fetched.'
+          required: true
+          schema:
+            type: string
+            example: abce@gmail.com
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'          
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid email supplied
+        '404':
+          description: User not found
+  /api/activities:
+    get:
+      responses:
+        200:
+          description: This is a list of the Activities in the app
+          content: 
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Activity'
+    post:
+      description: Add a activity to the app
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              $ref: '#/components/schemas/Activity' 
+      responses:
+         200:
+           description: The activity has been created  
+  /api/activities/{activity-id}:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/ActivityIdPath'
+      responses:
+        200:
+          description: This is a specifc activity in the app
+          content: 
+            application/json:
+              schema:
+                type: object
+                $ref: '#/components/schemas/Activity'
+    patch:
+      summary: Update an activity
+      description: Update specific activity details based on the provided activity ID.
+      parameters:
+        - name: activity-id
+          in: path
+          description: Unique identifier for the activity
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Activity details to be updated
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Activity'
+      responses:
+        '200':
+          description: Activity details updated successfully
+        '404':
+          description: Activity not found
+        '500':
+          description: Internal server error
+    delete:
+      description: delete a Activity
+      operationId: deleteActivity
+      parameters:
+        - $ref: '#/components/parameters/ActivityIdPath'
+      responses:
+        '400':
+          description: Invalid activity value
+  /api/users/{user-id}/activities:
+    get:
+      summary: Retrieve user activities
+      description: Get a list of activities associated with the specified user.
+      parameters:
+        - name: user-id
+          in: path
+          description: User's unique identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Activity'
+    delete:
+      summary: Delete user activities
+      description: Delete specific activities associated with the specified user.
+      parameters:
+        - name: user-id
+          in: path
+          description: User's unique identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No content (successful deletion)
+        '404':
+          description: User or activity not found
+        '500':
+          description: Internal server error
+    
+components:
+  schemas:
+    User:
+      type: object
+      properties:
+        id: 
+          type: integer
+          example: 3232
+        name:
+          type: string
+          example: Joe Soap
+        email:
+          type: string
+          example: joe@soap.com
+    Activity:
+      type: object
+      properties:
+        id: 
+          type: integer
+          example: 1
+        description:
+          type: string
+          example: Running
+        duration:
+          type: integer
+          example: 12.5
+        calories:
+          type: integer
+          example: 112
+        started:
+          type: string
+          example: 2020-06-10T04:59:27.258Z
+        user-id: 
+          type: integer
+          example: 3232
+  parameters:
+    UserIdPath:
+      in: path
+      name: user-id
+      description: User id path parameter
+      required: true
+      schema:
+        type: integer
+        example: 3232
+    ActivityIdPath:
+      in: path
+      name: activity-id
+      description: Activity id path parameter
+      required: true
+      schema:
+        type: integer
+        example: 1
+    
+      

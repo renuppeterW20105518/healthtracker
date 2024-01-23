@@ -1,66 +1,18 @@
 package ie.setu.controllers
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
-import ie.setu.domain.User
-import ie.setu.domain.repository.UserDAO
-import io.javalin.http.Context
-import ie.setu.domain.Activity
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.joda.JodaModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import ie.setu.domain.Activity
 import ie.setu.domain.repository.ActivityDAO
+import ie.setu.domain.repository.UserDAO
+import ie.setu.utils.jsonToObject
+import io.javalin.http.Context
 
-object HealthTrackerController {
+object ActivityController {
 
     private val userDao = UserDAO()
     private val activityDAO = ActivityDAO()
-
-    //--------------------------------------------------------------
-    // UserDAO specifics
-    //-------------------------------------------------------------
-
-    fun getAllUsers(ctx:Context){
-        ctx.json(userDao.getAll())
-    }
-
-    fun getUserByUserId(ctx: Context){
-        val user = userDao.findById(ctx.pathParam("user-id").toInt())
-        if (user != null){
-            ctx.json(user)
-        }
-    }
-
-    fun addUser(ctx: Context){
-        val mapper = jacksonObjectMapper()
-        val user = mapper.readValue<User>(ctx.body())
-        userDao.save(user)
-        ctx.json(user)
-    }
-
-    fun getUserByEmail(ctx: Context){
-        val user = userDao.findByEmail(ctx.pathParam("email"))
-        if (user != null){
-            ctx.json(user)
-        }
-    }
-
-    fun deleteUser(ctx: Context){
-        userDao.delete(ctx.pathParam("user-id").toInt())
-    }
-
-    fun updateUser(ctx: Context){
-        val mapper = jacksonObjectMapper()
-        val updateUser = mapper.readValue<User>(ctx.body())
-        userDao.update(
-            id = ctx.pathParam("user-id").toInt(),
-            user = updateUser
-        )
-    }
-
-    //--------------------------------------------------------------
-    // ActivityDAO specifics
-    //-------------------------------------------------------------
-
     fun getAllActivities(ctx: Context) {
         //mapper handles the deserialization of Joda date into a String.
         val mapper = jacksonObjectMapper()
@@ -84,10 +36,7 @@ object HealthTrackerController {
 
     fun addActivity(ctx: Context) {
         //mapper handles the serialisation of Joda date into a String.
-        val mapper = jacksonObjectMapper()
-            .registerModule(JodaModule())
-            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-        val activity = mapper.readValue<Activity>(ctx.body())
+        val activity : Activity = jsonToObject(ctx.body())
         activityDAO.save(activity)
         ctx.json(activity)
     }
@@ -101,13 +50,10 @@ object HealthTrackerController {
     }
 
     fun updateActivity(ctx: Context){
-        val mapper = jacksonObjectMapper()
-            .registerModule(JodaModule())
-            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-        val updateActivity = mapper.readValue<Activity>(ctx.body())
+        val activity : Activity = jsonToObject(ctx.body())
         activityDAO.update(
             id = ctx.pathParam("activity-id").toInt(),
-            activity = updateActivity)
+            activity = activity)
     }
 
     fun getActivitiesByActivityId(ctx: Context) {
@@ -119,5 +65,4 @@ object HealthTrackerController {
             ctx.json(mapper.writeValueAsString(activity))
         }
     }
-
 }
