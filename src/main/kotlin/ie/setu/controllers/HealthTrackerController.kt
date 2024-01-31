@@ -9,6 +9,7 @@ import ie.setu.domain.Activity
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.joda.JodaModule
 import ie.setu.domain.repository.ActivityDAO
+import ie.setu.utils.jsonToObject
 
 object HealthTrackerController {
 
@@ -92,22 +93,28 @@ object HealthTrackerController {
         ctx.json(activity)
     }
 
-    fun deleteActivityByActivityId(ctx: Context){
-        activityDAO.deleteActivityByActivityId(ctx.pathParam("activity-id").toInt())
+    fun deleteActivityByActivityId(ctx: Context) {
+        if(activityDAO.deleteByActivityId(ctx.pathParam("activity-id").toInt()) != 0)
+            ctx.status(204)
+        else
+            ctx.status(404)
     }
 
     fun deleteActivityByUserId(ctx: Context){
-        activityDAO.deleteActivityByUserId(ctx.pathParam("user-id").toInt())
+        if(activityDAO.deleteByUserId(ctx.pathParam("user-id").toInt()) != 0)
+            ctx.status(204)
+        else
+            ctx.status(404)
     }
 
     fun updateActivity(ctx: Context){
-        val mapper = jacksonObjectMapper()
-            .registerModule(JodaModule())
-            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-        val updateActivity = mapper.readValue<Activity>(ctx.body())
-        activityDAO.update(
-            id = ctx.pathParam("activity-id").toInt(),
-            activity = updateActivity)
+        val activity : Activity = jsonToObject(ctx.body())
+        if (activityDAO.updateByActivityId(
+                activityId = ctx.pathParam("activity-id").toInt(),
+                activityToUpdate = activity) != 0)
+            ctx.status(204)
+        else
+            ctx.status(404)
     }
 
     fun getActivitiesByActivityId(ctx: Context) {
