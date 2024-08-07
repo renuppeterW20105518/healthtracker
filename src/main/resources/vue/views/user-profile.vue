@@ -106,7 +106,7 @@ app.component("user-profile", {
         axios.delete(url)
             .then(response => {
               alert("User deleted")
-              //display the /users endpoint
+
               window.location.href = '/';
             })
             .catch(function (error) {

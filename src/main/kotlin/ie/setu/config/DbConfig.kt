@@ -17,7 +17,6 @@ class DbConfig {
         val PGPASSWORD = "KxRJaRJKBoeEaoWn2ktiQLTqVw4Tkc_2"
         val PGDATABASE = "csdicsau"
 
-        //url format should be jdbc:postgresql://host:port/database
         val dbUrl = "jdbc:postgresql://$PGHOST:$PGPORT/$PGDATABASE"
 
         val dbConfig = Database.connect(

@@ -1,6 +1,7 @@
 package ie.setu.config
 
 import ie.setu.controllers.ActivityController
+import ie.setu.controllers.TraineeController
 import ie.setu.controllers.UserController
 import ie.setu.utils.jsonObjectMapper
 import io.javalin.Javalin
@@ -15,7 +16,7 @@ class JavalinConfig {
         val app = Javalin.create{
             it.jsonMapper(JavalinJackson(jsonObjectMapper()))
             it.staticFiles.enableWebjars()
-            it.vue.vueAppName = "app" // only required for Vue 3, is defined in layout.html
+            it.vue.vueAppName = "app"
         }.apply {
                 exception(Exception::class.java){e,_ -> e.printStackTrace()}
                 error(404){ctx -> ctx.json("404 - Not found")}
@@ -59,16 +60,17 @@ class JavalinConfig {
                     patch(ActivityController::updateActivity)
                 }
             }
+            path("/api/registration-gym"){
+                post(TraineeController::addTrainee)
+            }
 
-            // The @routeComponent that we added in layout.html earlier will be replaced
-            // by the String inside the VueComponent. This means a call to / will load
-            // the layout and display our <home-page> component.
             get("/", VueComponent("<home-page></home-page>"))
             get("/users", VueComponent("<user-overview></user-overview>"))
             get("/users/{user-id}", VueComponent("<user-profile></user-profile>"))
             get("/users/{user-id}/activities", VueComponent("<user-activity-overview></user-activity-overview>"))
             get("/activities", VueComponent("<activity-overview></activity-overview>"))
             get("/activities/{activity-id}", VueComponent("<activity-profile></activity-profile>"))
+            get("/trainee-registration", VueComponent("<registration-gym></registration-gym"))
         }
     }
 }

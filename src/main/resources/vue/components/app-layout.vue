@@ -20,6 +20,12 @@
             <li class="nav-item">
               <a class="nav-link" href="/activities">Activities</a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/trainee-registration">Gym</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/trial">Gym-trial</a>
+            </li>
           </ul>
         </div>
       </nav>
