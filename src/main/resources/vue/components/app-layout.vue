@@ -21,10 +21,10 @@
               <a class="nav-link" href="/activities">Activities</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/trainee-registration">Gym</a>
+              <a class="nav-link" href="/trainee-login">Gym</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/trial">Gym-trial</a>
+              <a class="nav-link" href="/fitness">Fitness Goal</a>
             </li>
           </ul>
         </div>

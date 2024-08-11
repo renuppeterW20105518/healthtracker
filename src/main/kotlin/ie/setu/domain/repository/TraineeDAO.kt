@@ -2,8 +2,11 @@ package ie.setu.domain.repository
 
 import ie.setu.domain.Trainee
 import ie.setu.domain.db.Trainees
+import ie.setu.utils.mapToTrainee
 import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.and
 
 class TraineeDAO() {
     fun save(trainee: Trainee): Int? {
@@ -28,6 +31,27 @@ class TraineeDAO() {
                 it[emergency_contacts_phone_number] = trainee.emergency_contacts_phone_number
                 it[emergency_contacts_relation] = trainee.emergency_contacts_relation
             } get Trainees.traineeId
+        }
+    }
+
+//    fun findByUsernameandPassword(username: String, password: String): Trainee? {
+//        return transaction {
+//            Trainees.select() {
+//                Trainees.username eq username
+//                Trainees.password eq password
+//            }
+//                .map { mapToTrainee(it) }
+//                .firstOrNull()
+//        }
+//    }
+
+    fun findByUsernameandPassword(username: String, password: String): Trainee? {
+        return transaction {
+            Trainees.select {
+                (Trainees.username eq username) and (Trainees.password eq password)
+            }
+                .map { mapToTrainee(it) }
+                .firstOrNull()
         }
     }
 }

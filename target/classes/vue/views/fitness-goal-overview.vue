@@ -1,10 +1,10 @@
-<template id="activity-overview">
+<template id="fitness-goal-overview">
   <app-layout>
     <div class="card bg-light mb-3">
       <div class="card-header">
         <div class="row">
           <div class="col-6">
-            Activities
+            Fitness Goal
           </div>
           <div class="col" align="right">
             <button rel="tooltip" title="Add"
@@ -15,32 +15,52 @@
           </div>
         </div>
       </div>
+
       <div class="card-body" :class="{ 'd-none': hideForm}">
-        <form id="addActivity">
+        <form id="addFitness">
+
           <div class="input-group mb-3">
             <div class="input-group-prepend">
-              <span class="input-group-text" id="input-activity-name">Description</span>
+              <span class="input-group-text" id="input-fitness-goal">Goal</span>
             </div>
-            <input type="text" class="form-control" v-model="formData.description" name="description" placeholder="Description"/>
+            <input type="text" class="form-control" v-model="formData.goal" name="goal" placeholder="Goal"/>
           </div>
+
           <div class="input-group mb-3">
             <div class="input-group-prepend">
-              <span class="input-group-text" id="input-activity-duration">Duration</span>
+              <span class="input-group-text" id="input-fitness-duration">Duration</span>
             </div>
             <input type="text" class="form-control" v-model="formData.duration" name="duration" placeholder="Duration"/>
           </div>
+
           <div class="input-group mb-3">
             <div class="input-group-prepend">
-              <span class="input-group-text" id="input-activity-calories">Calories</span>
+              <span class="input-group-text" id="input-fitness-target">Target</span>
             </div>
-            <input type="text" class="form-control" v-model="formData.calories" name="calories" placeholder="Calories"/>
+            <input type="text" class="form-control" v-model="formData.target" name="target" placeholder="Target"/>
           </div>
+
           <div class="input-group mb-3">
             <div class="input-group-prepend">
-              <span class="input-group-text" id="input-activity-started">Started</span>
+              <span class="input-group-text" id="input-fitness-status">Status</span>
+            </div>
+            <input type="text" class="form-control" v-model="formData.status" name="status" placeholder="Status"/>
+          </div>
+
+          <div class="input-group mb-3">
+            <div class="input-group-prepend">
+              <span class="input-group-text" id="input-fitness-started">Started</span>
             </div>
             <input type="date" class="form-control" v-model="formData.started" name="started" placeholder="Started"/>
           </div>
+
+          <div class="input-group mb-3">
+            <div class="input-group-prepend">
+              <span class="input-group-text" id="input-fitness-ended">Ended</span>
+            </div>
+            <input type="date" class="form-control" v-model="formData.ended" name="ended" placeholder="Ended"/>
+          </div>
+
           <div class="input-group mb-3">
             <div class="input-group-prepend">
               <span class="input-group-text" id="input-userId-started">User Id</span>
@@ -48,27 +68,33 @@
             <input type="number" class="form-control" v-model="formData.userId" name="userId" placeholder="User Id"/>
           </div>
         </form>
-        <button rel="tooltip" title="Update" class="btn btn-info btn-simple btn-link" @click="addActivity()">Add Activity</button>
+        <button rel="tooltip" title="Update" class="btn btn-info btn-simple btn-link" @click="addFitness()">Add Fitness</button>
       </div>
     </div>
 
     <table class="table table-bordered table-striped table-hover">
       <thead>
       <tr>
-        <th scope="col" class="text-center">Description</th>
+        <th scope="col" class="text-center">Goal</th>
+        <th scope="col" class="text-center">Duration</th>
+        <th scope="col" class="text-center">Target</th>
+        <th scope="col" class="text-center">Status</th>
         <th scope="col" class="text-center">Actions</th>
       </tr>
       </thead>
       <tbody>
-      <tr v-for="(activity, index) in paginatedActivities" :key="index">
-        <td class="text-center">{{ activity.description }}</td>
+      <tr v-for="(fitness, index) in paginatedFitness" :key="index">
+        <td class="text-center">{{ fitness.goal }}</td>
+        <td class="text-center">{{ fitness.duration }}</td>
+        <td class="text-center">{{ fitness.target }}</td>
+        <td class="text-center">{{ fitness.status }}</td>
         <td class="text-center">
-          <a :href="`/activities/${activity.id}`">
+          <a :href="`/fitness/${fitness.id}`">
             <button rel="tooltip" title="Update" class="btn btn-info btn-simple btn-link mx-1">
               <i class="fa fa-pencil" aria-hidden="true"></i>
             </button>
             <button rel="tooltip" title="Delete" class="btn btn-info btn-simple btn-link"
-                    @click="deleteActivity(activity, index)">
+                    @click="deleteFitness(fitness, index)">
               <i class="fas fa-trash" aria-hidden="true"></i>
             </button>
           </a>
@@ -77,7 +103,7 @@
       </tbody>
     </table>
 
-    <nav aria-label="Activity Pagination">
+    <nav aria-label="Fitness Pagination">
       <ul class="pagination justify-content-center mt-3">
         <li class="page-item" :class="{ 'disabled': currentPage === 1 }">
           <a class="page-link" href="#" aria-label="Previous" @click="prevPage">
@@ -98,61 +124,64 @@
 </template>
 
 <script>
-app.component("activity-overview", {
-  template: "#activity-overview",
+
+app.component("fitness-goal-overview", {
+  template: "#fitness-goal-overview",
   data() {
     return {
-      activities: [],
-      formData: { description: "", duration: "", calories: "", started: "", userId: "" },
+      fitness: [],
+      formData: { goal: "", duration: "", target: "", status: "", started: "", ended: "", userId: "" },
       currentPage: 1,
       itemsPerPage: 5,
       hideForm: true
     };
   },
   created() {
-    this.fetchActivities();
+    this.fetchFitness();
   },
   computed: {
-    paginatedActivities() {
+    paginatedFitness() {
       const startIndex = (this.currentPage - 1) * this.itemsPerPage;
       const endIndex = startIndex + this.itemsPerPage;
-      return this.activities.slice(startIndex, endIndex);
+      return this.fitness.slice(startIndex, endIndex);
     },
     totalPages() {
-      return Math.ceil(this.activities.length / this.itemsPerPage);
+      return Math.ceil(this.fitness.length / this.itemsPerPage);
     },
   },
   methods: {
-    async fetchActivities() {
+    async fetchFitness() {
       try {
-        const response = await axios.get("api/activities");
-        this.activities = response.data;
+        const response = await axios.get("api/fitness");
+        this.fitness = response.data;
       } catch (error) {
-        alert("Error while fetching activities");
+        alert("Error while fetching fitness");
       }
     },
-    addActivity: function() {
-      const url = `/api/activities`;
+    addFitness: function() {
+      const url = `/api/fitness`;
       axios.post(url,
           {
-            description: this.formData.description,
+            goal: this.formData.goal,
             duration: this.formData.duration,
-            calories: this.formData.calories,
+            target: this.formData.target,
+            status: this.formData.status,
             started: this.formData.started,
+            ended: this.formData.ended,
             userId: this.formData.userId
           })
           .then(response => {
-            this.activities.push(response.data)
+            this.fitness.push(response.data)
             this.hideForm= true;
           })
           .catch(error => {
             console.log(error)
           })
     },
-    deleteActivity: function (activity, index) {
-      if (confirm('Are you sure you want to delete this activity? This action cannot be undone.')) {
-        const activityId = activity.id;
-        const url = `/api/activities/${activityId}`;
+    deleteFitness: function (fitness, index) {
+      if (confirm('Are you sure you want to delete this fitness goal? This action cannot be undone.')) {
+        const fitnessId = fitness.id;
+        const url = `/api/fitness/${fitnessId}`;
         axios.delete(url)
             .then(response =>
                 this.users.splice(index, 1).push(response.data))
@@ -173,7 +202,8 @@ app.component("activity-overview", {
       if (this.currentPage > 1) {
         this.currentPage--;
       }
-    },
-  },
+    }
+  }
 });
+
 </script>

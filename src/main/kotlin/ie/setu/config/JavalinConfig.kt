@@ -1,6 +1,7 @@
 package ie.setu.config
 
 import ie.setu.controllers.ActivityController
+import ie.setu.controllers.FitnessController
 import ie.setu.controllers.TraineeController
 import ie.setu.controllers.UserController
 import ie.setu.utils.jsonObjectMapper
@@ -46,6 +47,10 @@ class JavalinConfig {
                         get(ActivityController::getActivitiesByUserId)
                         delete(ActivityController::deleteActivityByUserId)
                     }
+                    path("fitness"){
+                        get(FitnessController::getFitnessByUserId)
+                        delete(FitnessController::deleteFitnessByUserId)
+                    }
                 }
                 path("/email/{email}"){
                     get(UserController::getUserByEmail)
@@ -63,6 +68,18 @@ class JavalinConfig {
             path("/api/registration-gym"){
                 post(TraineeController::addTrainee)
             }
+            path("/api/login-gym"){
+                post(TraineeController::login)
+            }
+            path("/api/fitness"){
+                get(FitnessController::getAllFitness)
+                post(FitnessController::addFitness)
+                path("{fitness-id}"){
+                    get(FitnessController::getFitnessByFitnessId)
+                    delete(FitnessController::deleteFitnessByFitnessId)
+                    patch(FitnessController::updateFitness)
+                }
+            }
 
             get("/", VueComponent("<home-page></home-page>"))
             get("/users", VueComponent("<user-overview></user-overview>"))
@@ -71,6 +88,11 @@ class JavalinConfig {
             get("/activities", VueComponent("<activity-overview></activity-overview>"))
             get("/activities/{activity-id}", VueComponent("<activity-profile></activity-profile>"))
             get("/trainee-registration", VueComponent("<registration-gym></registration-gym"))
+            get("/trainee-login", VueComponent("<login-gym></login-gym"))
+            get("/fitness", VueComponent("<fitness-goal-overview></fitness-goal-overview>"))
+            get("/fitness/{fitness-id}", VueComponent("<fitness-goal-profile></fitness-goal-profile>"))
+            get("/users/{user-id}/fitness", VueComponent("<user-fitness-overview></user-fitness-overview>"))
+            get("/images", VueComponent("<image-overview></image-overview>"))
         }
     }
 }

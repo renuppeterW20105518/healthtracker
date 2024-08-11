@@ -51,6 +51,7 @@
         <button rel="tooltip" title="Update" class="btn btn-info btn-simple btn-link" @click="addActivity()">Add Activity</button>
       </div>
     </div>
+
     <table class="table table-bordered table-striped table-hover">
       <thead>
       <tr>

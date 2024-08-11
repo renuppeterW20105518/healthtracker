@@ -42,3 +42,14 @@ fun mapToTrainee(it: ResultRow) = Trainee(
     emergency_contacts_phone_number = it[Trainees.emergency_contacts_phone_number],
     emergency_contacts_relation = it[Trainees.emergency_contacts_relation]
 )
+
+fun mapToFitnessGoal(it: ResultRow) = FitnessGoal(
+    id = it[FitnessGoals.id],
+    goal = it[FitnessGoals.goal],
+    duration = it[FitnessGoals.duration],
+    target = it[FitnessGoals.target],
+    status = it[FitnessGoals.status],
+    started = it[FitnessGoals.started],
+    ended = it[FitnessGoals.ended],
+    userId = it[FitnessGoals.userId]
+)

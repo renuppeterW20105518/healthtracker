@@ -20,6 +20,24 @@
           </div>
         </div>
       </div>
+      <div class="col">
+        <div class="card">
+          <h5 class="card-header">Total Fitness Goal</h5>
+          <div class="card-body">
+            <h5 class="card-title">{{fitness.length}} fitness goals</h5>
+            <a href="/fitness" class="btn btn-primary">More Details...</a>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card">
+          <h5 class="card-header">Total Images</h5>
+          <div class="card-body">
+            <h5 class="card-title">{{images.length}} images</h5>
+            <a href="/images" class="btn btn-primary">More Details...</a>
+          </div>
+        </div>
+      </div>
     </div>
   </app-layout>
 </template>
@@ -28,7 +46,9 @@ app.component('home-page', {
       template: "#home-page",
       data: () => ({
         users: [],
-        activities: []
+        activities: [],
+        fitness: [],
+        images: []
       }),
       created() {
         axios.get("/api/users")
@@ -37,6 +57,12 @@ app.component('home-page', {
         axios.get("/api/activities")
              .then(res => this.activities = res.data)
              .catch(() => alert("Error while fetching activities"));
+        axios.get("/api/fitness")
+            .then(res => this.fitness = res.data)
+            .catch(() => alert("Error while fetching fitness"));
+        // axios.get("/api/images")
+        //     .then(res => this.images = res.data)
+        //     .catch(() => alert("Error while fetching images"));
       }
     });
 </script>
