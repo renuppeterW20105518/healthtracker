@@ -36,3 +36,61 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+
+
+
+# Default ignored files
+/shelf/
+/workspace.xml
+# Editor-based HTTP Client requests
+/httpRequests/
+# Datasource local storage ignored files
+/dataSources/
+/dataSources.local.xml
+/.gitignore
+/.idea/
+/target/
+
+
+# IntelliJ IDEA specific files
+.idea/
+
+# Maven specific files
+*.log
+!src/main/resources
+!src/test/resources
+mvnw
+mvnw.cmd
+.settings/
+
+# Compiled class files
+*.class
+
+# Generated files
+*.jar
+*.war
+*.ear
+*.db
+
+# Windows specific files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS specific files
+.AppleDouble
+.LSOverride
+
+# Node modules
+node_modules/
+
+# Kotlin specific
+*.kotlin_module
+
+# JSON files
+*.json
+
+# Additional files
+*.lst

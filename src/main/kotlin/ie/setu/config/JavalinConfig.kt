@@ -1,6 +1,7 @@
 package ie.setu.config
 
 import ie.setu.controllers.ActivityController
+import ie.setu.controllers.FitnessController
 import ie.setu.controllers.UserController
 import ie.setu.utils.jsonObjectMapper
 import io.javalin.Javalin
@@ -45,6 +46,10 @@ class JavalinConfig {
                         get(ActivityController::getActivitiesByUserId)
                         delete(ActivityController::deleteActivityByUserId)
                     }
+                    path("fitness"){
+                        get(FitnessController::getFitnessByUserId)
+                        delete(FitnessController::deleteFitnessByUserId)
+                    }
                 }
                 path("/email/{email}"){
                     get(UserController::getUserByEmail)
@@ -59,6 +64,15 @@ class JavalinConfig {
                     patch(ActivityController::updateActivity)
                 }
             }
+            path("/api/fitness"){
+                get(FitnessController::getAllFitness)
+                post(FitnessController::addFitness)
+                path("{fitness-id}"){
+                    get(FitnessController::getFitnessByFitnessId)
+                    delete(FitnessController::deleteFitnessByFitnessId)
+                    patch(FitnessController::updateFitness)
+                }
+            }
 
             // The @routeComponent that we added in layout.html earlier will be replaced
             // by the String inside the VueComponent. This means a call to / will load
@@ -69,6 +83,9 @@ class JavalinConfig {
             get("/users/{user-id}/activities", VueComponent("<user-activity-overview></user-activity-overview>"))
             get("/activities", VueComponent("<activity-overview></activity-overview>"))
             get("/activities/{activity-id}", VueComponent("<activity-profile></activity-profile>"))
+            get("/fitness", VueComponent("<fitness-goal-overview></fitness-goal-overview>"))
+            get("/fitness/{fitness-id}", VueComponent("<fitness-goal-profile></fitness-goal-profile>"))
+            get("/users/{user-id}/fitness", VueComponent("<user-fitness-overview></user-fitness-overview>"))
         }
     }
 }
