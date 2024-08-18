@@ -55,6 +55,17 @@
           </li>
         </ul>
       </div>
+
+      <div class="card-footer text-left">
+        <p v-if="fitness.length === 0"> No fitness yet...</p>
+        <p v-if="fitness.length > 0"> Fitness so far...</p>
+        <ul>
+          <li v-for="fitness in fitness">
+            {{ fitness.goal }} for {{ fitness.duration }} days
+          </li>
+        </ul>
+      </div>
+
     </div>
   </app-layout>
 </template>
@@ -66,6 +77,7 @@ app.component("user-profile", {
     user: null,
     noUserFound: false,
     activities: [],
+    fitness: []
   }),
   created: function () {
     const userId = this.$javalin.pathParams["user-id"];
@@ -80,6 +92,11 @@ app.component("user-profile", {
         .then(res => this.activities = res.data)
         .catch(error => {
           console.log("No activities added yet (this is ok): " + error)
+        });
+    axios.get(url + `/fitness`)
+        .then(res => this.fitness = res.data)
+        .catch(error => {
+          console.log("No fitness added yet (this is ok): " + error)
         });
   },
   methods: {
