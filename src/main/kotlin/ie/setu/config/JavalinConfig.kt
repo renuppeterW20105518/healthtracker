@@ -2,6 +2,7 @@ package ie.setu.config
 
 import ie.setu.controllers.ActivityController
 import ie.setu.controllers.FitnessController
+import ie.setu.controllers.TraineeController
 import ie.setu.controllers.UserController
 import ie.setu.utils.jsonObjectMapper
 import io.javalin.Javalin
@@ -73,6 +74,12 @@ class JavalinConfig {
                     patch(FitnessController::updateFitness)
                 }
             }
+            path("/api/registration-gym"){
+                post(TraineeController::addTrainee)
+            }
+            path("/api/login-gym"){
+                post(TraineeController::login)
+            }
 
             // The @routeComponent that we added in layout.html earlier will be replaced
             // by the String inside the VueComponent. This means a call to / will load
@@ -86,6 +93,8 @@ class JavalinConfig {
             get("/fitness", VueComponent("<fitness-goal-overview></fitness-goal-overview>"))
             get("/fitness/{fitness-id}", VueComponent("<fitness-goal-profile></fitness-goal-profile>"))
             get("/users/{user-id}/fitness", VueComponent("<user-fitness-overview></user-fitness-overview>"))
+            get("/trainee-registration", VueComponent("<registration-gym></registration-gym"))
+            get("/trainee-login", VueComponent("<login-gym></login-gym"))
         }
     }
 }

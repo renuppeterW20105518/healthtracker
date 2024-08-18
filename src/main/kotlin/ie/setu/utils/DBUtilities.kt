@@ -2,10 +2,12 @@ package ie.setu.utils
 
 import ie.setu.domain.Activity
 import ie.setu.domain.FitnessGoal
+import ie.setu.domain.Trainee
 import ie.setu.domain.db.Users
 import ie.setu.domain.User
 import ie.setu.domain.db.Activities
 import ie.setu.domain.db.FitnessGoals
+import ie.setu.domain.db.Trainees
 import org.jetbrains.exposed.sql.ResultRow
 
 fun mapToUser (it: ResultRow) = User(
@@ -32,4 +34,26 @@ fun mapToFitnessGoal(it: ResultRow) = FitnessGoal(
     started = it[FitnessGoals.started],
     ended = it[FitnessGoals.ended],
     userId = it[FitnessGoals.userId]
+)
+
+fun mapToTrainee(it: ResultRow) = Trainee(
+    traineeId = it[Trainees.traineeId],
+    firstName = it[Trainees.firstName],
+    lastName = it[Trainees.lastName],
+    address = it[Trainees.address],
+    eircode = it[Trainees.eircode],
+    county = it[Trainees.county],
+    phoneNumber = it[Trainees.phoneNumber],
+    gender = it[Trainees.gender],
+    dateOfBirth = it[Trainees.dateOfBirth],
+    height = it[Trainees.height],
+    weight = it[Trainees.weight],
+    paymentMethod = it[Trainees.paymentMethod],
+    amount = it[Trainees.amount],
+    username = it[Trainees.username],
+    password = it[Trainees.password],
+    emergency_contacts_first_name = it[Trainees.emergency_contacts_first_name],
+    emergency_contacts_last_name = it[Trainees.emergency_contacts_last_name],
+    emergency_contacts_phone_number = it[Trainees.emergency_contacts_phone_number],
+    emergency_contacts_relation = it[Trainees.emergency_contacts_relation]
 )
