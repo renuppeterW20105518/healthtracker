@@ -3,6 +3,7 @@ package ie.setu.controllers
 import ie.setu.config.DbConfig
 import ie.setu.domain.Activity
 import ie.setu.domain.FitnessGoal
+import ie.setu.domain.Image
 import org.junit.jupiter.api.TestInstance
 import kong.unirest.Unirest
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -11,7 +12,6 @@ import org.junit.jupiter.api.Nested
 import kong.unirest.HttpResponse
 import kong.unirest.JsonNode
 import ie.setu.domain.User
-import ie.setu.domain.db.FitnessGoals.goal
 import ie.setu.helpers.*
 import ie.setu.utils.jsonToObject
 import ie.setu.utils.jsonNodeToObject
@@ -416,7 +416,7 @@ class HealthTrackerControllerTest {
 
     //--------------------------------------------------------------
     // Fitness Goal specifics
-    //-------------------------------------------------------------
+    //--------------------------------------------------------------
 
     @Nested
     inner class CreateFitnessGoals {
@@ -662,6 +662,257 @@ class HealthTrackerControllerTest {
         }
     }
 
+    //--------------------------------------------------------------
+    // Image specifics
+    //--------------------------------------------------------------
+
+    @Nested
+    inner class CreateImages {
+
+        @Test
+        fun `add an image when a user exists for it, returns a 201 response`() {
+
+            //Arrange - add a user and an associated image that we plan to do a delete on
+            val addedUser: User = jsonToObject(addUser(validName, validEmail).body.toString())
+
+            val addImageResponse = addImage(
+                images[0].title, images[0].description,
+                images[0].image_file_path, addedUser.id
+            )
+            assertEquals(201, addImageResponse.status)
+
+            //After - delete the user (Image will cascade delete in the database)
+            deleteUser(addedUser.id)
+        }
+
+        @Test
+        fun `add an image when no user exists for it, returns a 404 response`() {
+
+            //Arrange - check there is no user for -1 id
+            val userId = -1
+            assertEquals(404, retrieveUserById(userId).status)
+
+            val addImageResponse = addImage(
+                images.get(0).title, images.get(0).description,
+                images.get(0).image_file_path, userId
+            )
+            assertEquals(404, addImageResponse.status)
+        }
+    }
+
+    @Nested
+    inner class UpdateImages {
+
+        @Test
+        fun `updating an image by image id when it doesn't exist, returns a 404 response`() {
+            val userId = -1
+            val imageID = -1
+
+            //Arrange - check there is no user for -1 id
+            assertEquals(404, retrieveUserById(userId).status)
+
+            //Act & Assert - attempt to update the details of an image/user that doesn't exist
+            assertEquals(
+                404, updateImage(
+                    imageID, updatedTitle, updatedDescription,
+                    updatedImagefilepath, userId
+                ).status
+            )
+        }
+
+        @Test
+        fun `updating an image by image id when it exists, returns 204 response`() {
+
+            //Arrange - add a user and an associated image that we plan to do an update on
+            val addedUser : User = jsonToObject(addUser(validName, validEmail).body.toString())
+            val addImageResponse = addImage(
+                images[0].title,
+                images[0].description, images[0].image_file_path, addedUser.id)
+            assertEquals(201, addImageResponse.status)
+            val addedImage = jsonNodeToObject<Image>(addImageResponse)
+
+            //Act & Assert - update the added image and assert a 204 is returned
+            val updatedImageResponse = updateImage(addedImage.id, updatedTitle,
+                updatedDescription, updatedImagefilepath, addedUser.id)
+            assertEquals(204, updatedImageResponse.status)
+
+            //Assert that the individual fields were all updated as expected
+            val retrievedImageResponse = retrieveImageByImageId(addedImage.id)
+            val updatedImage = jsonNodeToObject<Image>(retrievedImageResponse)
+            assertEquals(updatedTitle,updatedImage.title)
+            assertEquals(updatedDescription,updatedImage.description)
+            assertEquals(updatedImagefilepath, updatedImage.image_file_path)
+            //After - delete the user
+            deleteUser(addedUser.id)
+        }
+    }
+
+    @Nested
+    inner class ReadImages {
+
+        @Test
+        fun `get all images from the database returns 200 or 404 response`() {
+            val response = retrieveAllImages()
+            if (response.status == 200){
+                val retrievedImages = jsonNodeToObject<Array<Image>>(response)
+                assertNotEquals(0, retrievedImages.size)
+            }
+            else{
+                assertEquals(404, response.status)
+            }
+        }
+
+        @Test
+        fun `get all images by user id when user and images exists returns 200 response`() {
+            //Arrange - add a user and 3 associated images that we plan to retrieve
+            val addedUser : User = jsonToObject(addUser(validName, validEmail).body.toString())
+            addImage(
+                images[0].title, images[0].description,
+                images[0].image_file_path, addedUser.id)
+            addImage(
+                images[1].title, images[1].description,
+                images[1].image_file_path, addedUser.id)
+            addImage(
+                images[2].title, images[2].description,
+                images[2].image_file_path, addedUser.id)
+
+            //Assert and Act - retrieve the three added images by user id
+            val response = retrieveImagesByUserId(addedUser.id)
+            assertEquals(200, response.status)
+            val retrievedImages = jsonNodeToObject<Array<Image>>(response)
+            assertEquals(3, retrievedImages.size)
+
+            //After - delete the added user and assert a 204 is returned (images are cascade deleted)
+            assertEquals(204, deleteUser(addedUser.id).status)
+        }
+
+        @Test
+        fun `get all images by user id when no images exist returns 404 response`() {
+            //Arrange - add a user
+            val addedUser : User = jsonToObject(addUser(validName, validEmail).body.toString())
+
+            //Assert and Act - retrieve the images by user id
+            val response = retrieveImagesByUserId(addedUser.id)
+            assertEquals(404, response.status)
+
+            //After - delete the added user and assert a 204 is returned
+            assertEquals(204, deleteUser(addedUser.id).status)
+        }
+
+        @Test
+        fun `get all images by user id when no user exists returns 404 response`() {
+            //Arrange
+            val userId = -1
+
+            //Assert and Act - retrieve images by user id
+            val response = retrieveImagesByUserId(userId)
+            assertEquals(404, response.status)
+        }
+
+        @Test
+        fun `get image by image id when no image exists returns 404 response`() {
+            //Arrange
+            val imageId = -1
+            //Assert and Act - attempt to retrieve the image by image id
+            val response = retrieveImageByImageId(imageId)
+            assertEquals(404, response.status)
+        }
+
+
+        @Test
+        fun `get image by image id when image exists returns 200 response`() {
+            //Arrange - add a user and associated image
+            val addedUser : User = jsonToObject(addUser(validName, validEmail).body.toString())
+            val addImageResponse = addImage(
+                images[0].title,
+                images[0].description,
+                images[0].image_file_path,
+                addedUser.id)
+            assertEquals(201, addImageResponse.status)
+            val addedImage = jsonNodeToObject<Image>(addImageResponse)
+
+            //Act & Assert - retrieve the image by image id
+            val response = retrieveImageByImageId(addedImage.id)
+            assertEquals(200, response.status)
+
+            //After - delete the added user and assert a 204 is returned
+            assertEquals(204, deleteUser(addedUser.id).status)
+        }
+
+    }
+
+    @Nested
+    inner class DeleteImages {
+
+        @Test
+        fun `deleting an image by image id when it doesn't exist, returns a 404 response`() {
+            //Act & Assert - attempt to delete a user that doesn't exist
+            assertEquals(404, deleteImageByImageId(-1).status)
+        }
+
+        @Test
+        fun `deleting images by user id when it doesn't exist, returns a 404 response`() {
+            //Act & Assert - attempt to delete a user that doesn't exist
+            assertEquals(404, deleteImagesByUserId(-1).status)
+        }
+
+        @Test
+        fun `deleting an image by id when it exists, returns a 204 response`() {
+
+            //Arrange - add a user and an associated image that we plan to do a delete on
+            val addedUser : User = jsonToObject(addUser(validName, validEmail).body.toString())
+            val addImageResponse = addImage(
+                                   images[0].title,
+                                   images[0].description,
+                                   images[0].image_file_path,
+                                   addedUser.id)
+            assertEquals(201, addImageResponse.status)
+
+            //Act & Assert - delete the added image and assert a 204 is returned
+            val addedImage = jsonNodeToObject<Image>(addImageResponse)
+            assertEquals(204, deleteImageByImageId(addedImage.id).status)
+
+            //After - delete the user
+            deleteUser(addedUser.id)
+        }
+
+        @Test
+        fun `deleting all images by userid when it exists, returns a 204 response`() {
+
+            //Arrange - add a user and 3 associated images that we plan to do a cascade delete
+            val addedUser : User = jsonToObject(addUser(validName, validEmail).body.toString())
+            val addImageResponse1 = addImage(
+                images[0].title,
+                images[0].description,
+                images[0].image_file_path,
+                addedUser.id)
+            assertEquals(201, addImageResponse1.status)
+            val addImageResponse2 = addImage(
+                images[1].title,
+                images[1].description,
+                images[1].image_file_path,
+                addedUser.id)
+            assertEquals(201, addImageResponse2.status)
+            val addImageResponse3 = addImage(
+                images[2].title,
+                images[2].description,
+                images[2].image_file_path,
+                addedUser.id)
+            assertEquals(201, addImageResponse3.status)
+
+            //Act & Assert - delete the added user and assert a 204 is returned
+            assertEquals(204, deleteUser(addedUser.id).status)
+
+            //Act & Assert - attempt to retrieve the deleted images
+            val addedImage1 = jsonNodeToObject<Image>(addImageResponse1)
+            val addedImage2 = jsonNodeToObject<Image>(addImageResponse2)
+            val addedImage3 = jsonNodeToObject<Image>(addImageResponse3)
+            assertEquals(404, retrieveImageByImageId(addedImage1.id).status)
+            assertEquals(404, retrieveImageByImageId(addedImage2.id).status)
+            assertEquals(404, retrieveImageByImageId(addedImage3.id).status)
+        }
+    }
+
     //helper function to add a test user to the database
     private fun addUser (name: String, email: String): HttpResponse<JsonNode> {
         return Unirest.post(origin + "/api/users")
@@ -798,6 +1049,51 @@ class HealthTrackerControllerTest {
 
     private fun deleteFitnessGoalByFitnessGoalId(id: Int): HttpResponse<String> {
         return Unirest.delete(origin + "/api/fitness/$id").asString()
+    }
+
+    private fun addImage(title: String, description: String, image_file_path: String, userId: Int): HttpResponse<JsonNode> {
+        return Unirest.post(origin + "/api/images")
+            .body("""
+                {
+                   "title":"$title",
+                   "description":"$description",
+                   "image_file_path":"$image_file_path",
+                   "userId":$userId
+                }
+            """.trimIndent())
+            .asJson()
+    }
+
+    private fun updateImage(id: Int, title: String, description: String, image_file_path: String, userId: Int): HttpResponse<JsonNode> {
+        return Unirest.patch(origin + "/api/images/$id")
+            .body("""
+                {
+                  "title":"$title",
+                  "description":"$description",
+                  "image_file_path":"$image_file_path",
+                  "userId":$userId
+                }
+            """.trimIndent()).asJson()
+    }
+
+    private fun retrieveImageByImageId(id: Int): HttpResponse<JsonNode> {
+        return Unirest.get(origin + "/api/images/${id}").asJson()
+    }
+
+    private fun retrieveAllImages(): HttpResponse<JsonNode> {
+        return Unirest.get(origin + "/api/images").asJson()
+    }
+
+    private fun retrieveImagesByUserId(id: Int): HttpResponse<JsonNode> {
+        return Unirest.get(origin + "/api/users/${id}/images").asJson()
+    }
+
+    private fun deleteImageByImageId(id: Int): HttpResponse<String> {
+        return Unirest.delete(origin + "/api/images/$id").asString()
+    }
+
+    private fun deleteImagesByUserId(id: Int): HttpResponse<String> {
+        return Unirest.delete(origin + "/api/users/$id/images").asString()
     }
 
 }
