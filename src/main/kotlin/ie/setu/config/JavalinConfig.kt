@@ -1,9 +1,6 @@
 package ie.setu.config
 
-import ie.setu.controllers.ActivityController
-import ie.setu.controllers.FitnessController
-import ie.setu.controllers.TraineeController
-import ie.setu.controllers.UserController
+import ie.setu.controllers.*
 import ie.setu.utils.jsonObjectMapper
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.*
@@ -51,6 +48,10 @@ class JavalinConfig {
                         get(FitnessController::getFitnessByUserId)
                         delete(FitnessController::deleteFitnessByUserId)
                     }
+                    path("images"){
+                        get(ImageController::getImagesByUserId)
+                        delete(ImageController::deleteImageByUserId)
+                    }
                 }
                 path("/email/{email}"){
                     get(UserController::getUserByEmail)
@@ -74,6 +75,15 @@ class JavalinConfig {
                     patch(FitnessController::updateFitness)
                 }
             }
+            path("/api/images") {
+                get(ImageController::getAllImages)
+                post(ImageController::addImage)
+                path("{image-id}"){
+                    get(ImageController::getImagesByImageId)
+                    delete(ImageController::deleteImageByImageId)
+                    patch(ImageController::updateImage)
+                }
+            }
             path("/api/registration-gym"){
                 post(TraineeController::addTrainee)
             }
@@ -95,6 +105,8 @@ class JavalinConfig {
             get("/users/{user-id}/fitness", VueComponent("<user-fitness-overview></user-fitness-overview>"))
             get("/trainee-registration", VueComponent("<registration-gym></registration-gym"))
             get("/trainee-login", VueComponent("<login-gym></login-gym"))
+            get("/images", VueComponent("<image-overview></image-overview>"))
+            get("/images/{image-id}", VueComponent("<image-profile></image-profile>"))
         }
     }
 }

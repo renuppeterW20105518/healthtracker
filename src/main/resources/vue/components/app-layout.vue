@@ -24,6 +24,9 @@
               <a class="nav-link" href="/fitness">Fitness Goal</a>
             </li>
             <li class="nav-item">
+              <a class="nav-link" href="/images">Images</a>
+            </li>
+            <li class="nav-item">
               <a class="nav-link" href="/trainee-login">Gym</a>
             </li>
           </ul>
