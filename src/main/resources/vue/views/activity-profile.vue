@@ -34,7 +34,7 @@
             <div class="input-group-prepend">
               <span class="input-group-text" id="input-activity-description">Description</span>
             </div>
-            <input class="form-control" v-model="activity.description" name="description" type="text" readonly placeholder="description"/>
+            <input class="form-control" v-model="activity.description" name="description" type="text" placeholder="description"/>
           </div>
           <div class="input-group mb-3">
             <div class="input-group-prepend">

@@ -2,6 +2,7 @@ package ie.setu.controllers
 
 import ie.setu.config.DbConfig
 import ie.setu.domain.Activity
+import ie.setu.domain.FitnessGoal
 import org.junit.jupiter.api.TestInstance
 import kong.unirest.Unirest
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.Nested
 import kong.unirest.HttpResponse
 import kong.unirest.JsonNode
 import ie.setu.domain.User
+import ie.setu.domain.db.FitnessGoals.goal
 import ie.setu.helpers.*
 import ie.setu.utils.jsonToObject
 import ie.setu.utils.jsonNodeToObject
@@ -166,6 +168,10 @@ class HealthTrackerControllerTest {
             assertEquals(404, retrieveUserById(addedUser.id).status)
         }
     }
+
+    //--------------------------------------------------------------
+    // Activities specifics
+    //-------------------------------------------------------------
 
     @Nested
     inner class CreateActivities {
@@ -408,6 +414,254 @@ class HealthTrackerControllerTest {
         }
     }
 
+    //--------------------------------------------------------------
+    // Fitness Goal specifics
+    //-------------------------------------------------------------
+
+    @Nested
+    inner class CreateFitnessGoals {
+
+        @Test
+        fun `add an fitness goal when a user exists for it, returns a 201 response`() {
+
+            //Arrange - add a user and an associated fitness goal that we plan to do a delete on
+            val addedUser: User = jsonToObject(addUser(validName, validEmail).body.toString())
+
+            val addFitnessGoalResponse = addFitnessGoal(
+                fitnessGoals[0].goal, fitnessGoals[0].duration, fitnessGoals[0].target,
+                fitnessGoals[0].status, fitnessGoals[0].started, fitnessGoals[0].ended, addedUser.id
+            )
+            assertEquals(201, addFitnessGoalResponse.status)
+
+            //After - delete the user (FitnessGoal will cascade delete in the database)
+            deleteUser(addedUser.id)
+        }
+
+        @Test
+        fun `add an fitness goal when no user exists for it, returns a 404 response`() {
+
+            //Arrange - check there is no user for -1 id
+            val userId = -1
+            assertEquals(404, retrieveUserById(userId).status)
+
+            val addFitnessGoalResponse = addFitnessGoal(
+                fitnessGoals.get(0).goal, fitnessGoals.get(0).duration,fitnessGoals.get(0).target,
+                fitnessGoals.get(0).status, fitnessGoals.get(0).started,fitnessGoals.get(0).ended, userId
+            )
+            assertEquals(404, addFitnessGoalResponse.status)
+        }
+    }
+
+    @Nested
+    inner class UpdateFitnessGoals {
+
+        @Test
+        fun `updating an fitness goal by fitness id when it doesn't exist, returns a 404 response`() {
+            val userId = -1
+            val fitnessGoalID = -1
+
+            //Arrange - check there is no user for -1 id
+            assertEquals(404, retrieveUserById(userId).status)
+
+            //Act & Assert - attempt to update the details of a fitnessGoal/user that doesn't exist
+            assertEquals(
+                404, updateFitnessGoal(
+                    fitnessGoalID, updatedGoal, updatedDuration, updatedTarget,
+                    updatedStatus, updatedStarted, updatedEnded, userId
+                ).status
+            )
+        }
+
+        @Test
+        fun `updating an fitness goal by fitness id when it exists, returns 204 response`() {
+
+            //Arrange - add a user and an associated fitness Goal that we plan to do an update on
+            val addedUser : User = jsonToObject(addUser(validName, validEmail).body.toString())
+            val addFitnessGoalResponse = addFitnessGoal(
+                fitnessGoals[0].goal, fitnessGoals[0].duration,
+                fitnessGoals[0].target, fitnessGoals[0].status,
+                fitnessGoals[0].started,fitnessGoals[0].ended, addedUser.id)
+            assertEquals(201, addFitnessGoalResponse.status)
+            val addedFitnessGoal = jsonNodeToObject<FitnessGoal>(addFitnessGoalResponse)
+
+            //Act & Assert - update the added fitness goal and assert a 204 is returned
+            val updatedFitnessGoalResponse = updateFitnessGoal(addedFitnessGoal.id, updatedGoal,
+                updatedDuration, updatedTarget, updatedStatus, updatedStarted, updatedEnded, addedUser.id)
+            assertEquals(204, updatedFitnessGoalResponse.status)
+
+            //Assert that the individual fields were all updated as expected
+            val retrievedFitnessGoalResponse = retrieveFitnessGoalByFitnessGoalId(addedFitnessGoal.id)
+            val updatedFitnessGoal = jsonNodeToObject<FitnessGoal>(retrievedFitnessGoalResponse)
+            assertEquals(updatedGoal,updatedFitnessGoal.goal)
+            assertEquals(updatedDuration, updatedFitnessGoal.duration, 0.1)
+            assertEquals(updatedTarget, updatedFitnessGoal.target)
+            assertEquals(updatedStatus, updatedFitnessGoal.status)
+            assertEquals(updatedStarted, updatedFitnessGoal.started)
+            assertEquals(updatedEnded, updatedFitnessGoal.ended )
+
+            //After - delete the user
+            deleteUser(addedUser.id)
+        }
+    }
+
+    @Nested
+    inner class ReadFitnessGoals {
+
+        @Test
+        fun `get all fitness goals from the database returns 200 or 404 response`() {
+            val response = retrieveAllFitnessGoals()
+            if (response.status == 200){
+                val retrievedFitnessGoals = jsonNodeToObject<Array<FitnessGoal>>(response)
+                assertNotEquals(0, retrievedFitnessGoals.size)
+            }
+            else{
+                assertEquals(404, response.status)
+            }
+        }
+
+        @Test
+        fun `get all fitness goals by user id when user and fitnessGoals exists returns 200 response`() {
+            //Arrange - add a user and 3 associated fitnessGoals that we plan to retrieve
+            val addedUser : User = jsonToObject(addUser(validName, validEmail).body.toString())
+            addFitnessGoal(
+                fitnessGoals[0].goal, fitnessGoals[0].duration, fitnessGoals[0].target,
+                fitnessGoals[0].status, fitnessGoals[0].started,fitnessGoals[0].ended, addedUser.id)
+            addFitnessGoal(
+                fitnessGoals[1].goal, fitnessGoals[1].duration, fitnessGoals[1].target,
+                fitnessGoals[1].status, fitnessGoals[1].started,fitnessGoals[1].ended, addedUser.id)
+            addFitnessGoal(
+                fitnessGoals[2].goal, fitnessGoals[2].duration, fitnessGoals[2].target,
+                fitnessGoals[2].status, fitnessGoals[2].started,fitnessGoals[2].ended, addedUser.id)
+
+            //Assert and Act - retrieve the three added fitness goals by user id
+            val response = retrieveFitnessGoalsByUserId(addedUser.id)
+            assertEquals(200, response.status)
+            val retrievedFitnessGoals = jsonNodeToObject<Array<FitnessGoal>>(response)
+            assertEquals(3, retrievedFitnessGoals.size)
+
+            //After - delete the added user and assert a 204 is returned (fitness goals are cascade deleted)
+            assertEquals(204, deleteUser(addedUser.id).status)
+        }
+
+        @Test
+        fun `get all fitness goals by user id when no fitness goals exist returns 404 response`() {
+            //Arrange - add a user
+            val addedUser : User = jsonToObject(addUser(validName, validEmail).body.toString())
+
+            //Assert and Act - retrieve the fitness goals by user id
+            val response = retrieveFitnessGoalsByUserId(addedUser.id)
+            assertEquals(404, response.status)
+
+            //After - delete the added user and assert a 204 is returned
+            assertEquals(204, deleteUser(addedUser.id).status)
+        }
+
+        @Test
+        fun `get all fitness goals by user id when no user exists returns 404 response`() {
+            //Arrange
+            val userId = -1
+
+            //Assert and Act - retrieve fitness goals by user id
+            val response = retrieveFitnessGoalsByUserId(userId)
+            assertEquals(404, response.status)
+        }
+
+        @Test
+        fun `get fitness goal by fitness goal id when no fitness goal exists returns 404 response`() {
+            //Arrange
+            val fitnessGoalId = -1
+            //Assert and Act - attempt to retrieve the fitness goal by fitness goal id
+            val response = retrieveFitnessGoalByFitnessGoalId(fitnessGoalId)
+            assertEquals(404, response.status)
+        }
+
+
+        @Test
+        fun `get fitness goal by fitness goal id when fitness goal exists returns 200 response`() {
+            //Arrange - add a user and associated fitness goal
+            val addedUser : User = jsonToObject(addUser(validName, validEmail).body.toString())
+            val addFitnessGoalResponse = addFitnessGoal(
+                fitnessGoals[0].goal,
+                fitnessGoals[0].duration, fitnessGoals[0].target,
+                fitnessGoals[0].status, fitnessGoals[0].started,
+                fitnessGoals[0].ended, addedUser.id)
+            assertEquals(201, addFitnessGoalResponse.status)
+            val addedFitnessGoal = jsonNodeToObject<FitnessGoal>(addFitnessGoalResponse)
+
+            //Act & Assert - retrieve the fitness goal by FitnessGoal id
+            val response = retrieveFitnessGoalByFitnessGoalId(addedFitnessGoal.id)
+            assertEquals(200, response.status)
+
+            //After - delete the added user and assert a 204 is returned
+            assertEquals(204, deleteUser(addedUser.id).status)
+        }
+
+    }
+
+    @Nested
+    inner class DeleteFitnessGoals {
+
+        @Test
+        fun `deleting an fitness goal by fitness goal id when it doesn't exist, returns a 404 response`() {
+            //Act & Assert - attempt to delete a user that doesn't exist
+            assertEquals(404, deleteFitnessGoalByFitnessGoalId(-1).status)
+        }
+
+        @Test
+        fun `deleting fitness goals by user id when it doesn't exist, returns a 404 response`() {
+            //Act & Assert - attempt to delete a user that doesn't exist
+            assertEquals(404, deleteFitnessGoalsByUserId(-1).status)
+        }
+
+        @Test
+        fun `deleting an fitness goal by id when it exists, returns a 204 response`() {
+
+            //Arrange - add a user and an associated fitness goal that we plan to do a delete on
+            val addedUser : User = jsonToObject(addUser(validName, validEmail).body.toString())
+            val addFitnessGoalResponse = addFitnessGoal(
+                fitnessGoals[0].goal, fitnessGoals[0].duration, fitnessGoals[0].target ,
+                fitnessGoals[0].status, fitnessGoals[0].started, fitnessGoals[0].ended, addedUser.id)
+            assertEquals(201, addFitnessGoalResponse.status)
+
+            //Act & Assert - delete the added fitness goal and assert a 204 is returned
+            val addedFitnessGoal = jsonNodeToObject<FitnessGoal>(addFitnessGoalResponse)
+            assertEquals(204, deleteFitnessGoalByFitnessGoalId(addedFitnessGoal.id).status)
+
+            //After - delete the user
+            deleteUser(addedUser.id)
+        }
+
+        @Test
+        fun `deleting all fitness goals by userid when it exists, returns a 204 response`() {
+
+            //Arrange - add a user and 3 associated fitness goals that we plan to do a cascade delete
+            val addedUser : User = jsonToObject(addUser(validName, validEmail).body.toString())
+            val addFitnessGoalResponse1 = addFitnessGoal(
+                fitnessGoals[0].goal, fitnessGoals[0].duration, fitnessGoals[0].target,
+                fitnessGoals[0].status, fitnessGoals[0].started, fitnessGoals[0].ended, addedUser.id)
+            assertEquals(201, addFitnessGoalResponse1.status)
+            val addFitnessGoalResponse2 = addFitnessGoal(
+                fitnessGoals[1].goal, fitnessGoals[1].duration, fitnessGoals[1].target,
+                fitnessGoals[1].status, fitnessGoals[1].started, fitnessGoals[1].ended, addedUser.id)
+            assertEquals(201, addFitnessGoalResponse2.status)
+            val addFitnessGoalResponse3 = addFitnessGoal(
+                fitnessGoals[2].goal, fitnessGoals[2].duration, fitnessGoals[2].target,
+                fitnessGoals[2].status, fitnessGoals[2].started, fitnessGoals[2].ended, addedUser.id)
+            assertEquals(201, addFitnessGoalResponse3.status)
+
+            //Act & Assert - delete the added user and assert a 204 is returned
+            assertEquals(204, deleteUser(addedUser.id).status)
+
+            //Act & Assert - attempt to retrieve the deleted fitness goals
+            val addedFitnessGoal1 = jsonNodeToObject<FitnessGoal>(addFitnessGoalResponse1)
+            val addedFitnessGoal2 = jsonNodeToObject<FitnessGoal>(addFitnessGoalResponse2)
+            val addedFitnessGoal3 = jsonNodeToObject<FitnessGoal>(addFitnessGoalResponse3)
+            assertEquals(404, retrieveFitnessGoalByFitnessGoalId(addedFitnessGoal1.id).status)
+            assertEquals(404, retrieveFitnessGoalByFitnessGoalId(addedFitnessGoal2.id).status)
+            assertEquals(404, retrieveFitnessGoalByFitnessGoalId(addedFitnessGoal3.id).status)
+        }
+    }
+
     //helper function to add a test user to the database
     private fun addUser (name: String, email: String): HttpResponse<JsonNode> {
         return Unirest.post(origin + "/api/users")
@@ -490,6 +744,60 @@ class HealthTrackerControllerTest {
     //helper function to delete an activity by activity id
     private fun deleteActivitiesByUserId(id: Int): HttpResponse<String> {
         return Unirest.delete(origin + "/api/users/$id/activities").asString()
+    }
+
+    private fun addFitnessGoal(goal: String, duration: Double, target: String,  status: String,
+                            started: DateTime, ended: DateTime, userId: Int): HttpResponse<JsonNode> {
+        return Unirest.post(origin + "/api/fitness")
+            .body("""
+                {
+                   "goal":"$goal",
+                   "duration":$duration,
+                   "target":"$target",
+                   "status":$status,
+                   "started":"$started",
+                   "ended":"$ended",
+                   "userId":$userId
+                }
+            """.trimIndent())
+            .asJson()
+    }
+
+    private fun updateFitnessGoal(id: Int, goal: String, duration: Double, target: String, status: String,
+        started: DateTime, ended: DateTime, userId: Int
+    ): HttpResponse<JsonNode> {
+        return Unirest.patch(origin + "/api/fitness/$id")
+            .body("""
+                {
+                  "goal":"$goal",
+                  "duration":$duration,
+                  "target":"$target",
+                  "status":"$status",
+                  "started":"$started",
+                  "ended":"$ended",
+                  "userId":$userId
+                }
+            """.trimIndent()).asJson()
+    }
+
+    private fun retrieveFitnessGoalByFitnessGoalId(id: Int): HttpResponse<JsonNode> {
+        return Unirest.get(origin + "/api/fitness/${id}").asJson()
+    }
+
+    private fun retrieveAllFitnessGoals(): HttpResponse<JsonNode> {
+        return Unirest.get(origin + "/api/fitness").asJson()
+    }
+
+    private fun retrieveFitnessGoalsByUserId(id: Int): HttpResponse<JsonNode> {
+        return Unirest.get(origin + "/api/users/${id}/fitness").asJson()
+    }
+
+    private fun deleteFitnessGoalsByUserId(id: Int): HttpResponse<String> {
+        return Unirest.delete(origin + "/api/users/$id/fitness").asString()
+    }
+
+    private fun deleteFitnessGoalByFitnessGoalId(id: Int): HttpResponse<String> {
+        return Unirest.delete(origin + "/api/fitness/$id").asString()
     }
 
 }
