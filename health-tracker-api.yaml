@@ -338,6 +338,115 @@ paths:
           description: User or fitness goal not found
         500:
           description: Internal server error
+  /api/users/{user-id}/images:
+    parameters:
+      - $ref: '#/components/parameters/UserIdPath'
+    get:
+      summary: Retrieve user images
+      description: Get a list of images associated with the specified user.
+      responses:
+        200:
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Image'
+        404:
+          description: User not found
+    delete:
+      summary: Delete user images
+      description: Delete all images associated with the specified user.
+      responses:
+        204:
+          description: No content (successful deletion)
+        404:
+          description: User or activity not found
+        500:
+          description: Internal server error
+  /api/images:
+    get:
+      summary: Retrieve a list of images
+      description: Get a list of all images in the app.
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Image'
+    post:
+      summary: Create a new image
+      description: Add a new image to the app.
+      requestBody:
+        description: Image object that needs to be added
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Image'
+      responses:
+        201:
+          description: Image created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Image'
+        400:
+          description: Invalid input
+          
+  /api/images/{image-id}:
+    parameters:
+      - $ref: '#/components/parameters/ImageIdPath'
+    get:
+      summary: Retrieve image details
+      description: Get specific image details based on the provided image ID.
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Image'
+        404:
+          description: Image not found
+    patch:
+      summary: Update image details
+      description: Update specific image information based on the provided image ID.
+      requestBody:
+        description: Image details to be updated
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Image'
+      responses:
+        200:
+          description: Image updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Image'
+        400:
+          description: Invalid image ID supplied
+        404:
+          description: Image not found
+        500:
+          description: Internal server error
+    delete:
+      summary: Delete an image
+      description: Delete a specific image based on the provided image ID.
+      responses:
+        204:
+          description: No content (successful deletion)
+        400:
+          description: Invalid image ID supplied
+        404:
+          description: image not found
+
 components:
   parameters:
     UserIdPath:
@@ -352,6 +461,22 @@ components:
       in: path
       name: activity-id
       description: Activity ID path parameter
+      required: true
+      schema:
+        type: integer
+        example: 1
+    FitnessIdPath:
+      in: path
+      name: fitness-id
+      description: Fitness ID path parameter
+      required: true
+      schema:
+        type: integer
+        example: 1
+    ImageIdPath:
+      in: path
+      name: image-id
+      description: image ID path parameter
       required: true
       schema:
         type: integer
@@ -422,3 +547,21 @@ components:
         user-id:
           type: integer
           example: 331
+    Image:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        title:
+          type: string
+          example: Running
+        description:
+          type: string
+          example: Running description
+        image_file_path:
+          type: string
+          example: Running image file path
+        user-id:
+          type: integer
+          example: 3232
