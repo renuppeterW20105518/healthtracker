@@ -1,10 +1,13 @@
 package ie.setu.helpers
 
 import ie.setu.domain.Activity
+import ie.setu.domain.FitnessGoal
 import ie.setu.domain.User
 import ie.setu.domain.db.Activities
+import ie.setu.domain.db.FitnessGoals
 import ie.setu.domain.db.Users
 import ie.setu.domain.repository.ActivityDAO
+import ie.setu.domain.repository.FitnessGoalDAO
 import ie.setu.domain.repository.UserDAO
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.joda.time.DateTime
@@ -21,7 +24,10 @@ val updatedDuration = 0.00;
 val updatedCalories = -1;
 val updatedStarted = DateTime.parse("2023-12-27T14:45:11.087Z");
 
-
+val updatedGoal = "Updated Goal"
+val updatedTarget = "Updated Target";
+val updatedStatus = "Updated Status";
+val updatedEnded = DateTime.parse("2023-12-27T14:45:11.087Z");
 
 
 val users = arrayListOf<User>(
@@ -35,6 +41,12 @@ val activities = arrayListOf<Activity>(
     Activity(id = 1, description = "Running", duration = 22.0, calories = 230, started = DateTime.now(), userId = 1),
     Activity(id = 2, description = "Hopping", duration = 10.5, calories = 80, started = DateTime.now(), userId = 1),
     Activity(id = 3, description = "Walking", duration = 12.0, calories = 120, started = DateTime.now(), userId = 2)
+)
+
+val fitnessGoals = arrayListOf<FitnessGoal>(
+    FitnessGoal(id = 1, goal = "Running", duration = 22.0, target = "increase speed", status = "incomplete", started = DateTime.now(), ended = DateTime.now(), userId = 1),
+    FitnessGoal(id = 2, goal = "Hopping", duration = 10.5, target = "reduce weight", status = "incomplete", started = DateTime.now(), ended = DateTime.now(), userId = 1),
+    FitnessGoal(id = 3, goal = "Walking", duration = 12.0, target = "boost energy", status = "incomplete", started = DateTime.now(), ended = DateTime.now(), userId = 2)
 )
 
 fun populateActivityTable(): ActivityDAO {
@@ -53,4 +65,13 @@ fun populateUserTable(): UserDAO {
     userDAO.save(users.get(1))
     userDAO.save(users.get(2))
     return userDAO
+}
+
+fun populateFitnessGoalTable(): FitnessGoalDAO {
+    SchemaUtils.create(FitnessGoals)
+    val fitnessGoalDAO = FitnessGoalDAO()
+    fitnessGoalDAO.save(fitnessGoals.get(0))
+    fitnessGoalDAO.save(fitnessGoals.get(1))
+    fitnessGoalDAO.save(fitnessGoals.get(2))
+    return fitnessGoalDAO
 }
