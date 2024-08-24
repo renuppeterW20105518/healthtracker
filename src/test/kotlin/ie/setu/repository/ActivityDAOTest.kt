@@ -136,7 +136,7 @@ class ActivityDAOTest{
                 //Act & Assert
                 val activity3updated = Activity(id = 3, description = "Cardio", duration = 42.0,
                     calories = 220, started = DateTime.now(), userId = 2)
-                activityDAO.update(activity3updated.id, activity3updated)
+                activityDAO.updateByActivityId(activity3updated.id, activity3updated)
                 assertEquals(activity3updated, activityDAO.findByActivityId(3))
             }
         }
@@ -152,7 +152,7 @@ class ActivityDAOTest{
                 //Act & Assert
                 val activity4updated = Activity(id = 4, description = "Cardio", duration = 42.0,
                     calories = 220, started = DateTime.now(), userId = 2)
-                activityDAO.update(4, activity4updated)
+                activityDAO.updateByActivityId(4, activity4updated)
                 assertEquals(null, activityDAO.findByActivityId(4))
                 assertEquals(3, activityDAO.getAll().size)
             }
@@ -172,7 +172,7 @@ class ActivityDAOTest{
 
                 //Act & Assert
                 assertEquals(3, activityDAO.getAll().size)
-                activityDAO.deleteActivityByActivityId(4)
+                activityDAO.deleteByActivityId(4)
                 assertEquals(3, activityDAO.getAll().size)
             }
         }
@@ -187,7 +187,7 @@ class ActivityDAOTest{
 
                 //Act & Assert
                 assertEquals(3, activityDAO.getAll().size)
-                activityDAO.deleteActivityByActivityId(activity3.id)
+                activityDAO.deleteByActivityId(activity3.id)
                 assertEquals(2, activityDAO.getAll().size)
             }
         }
@@ -203,7 +203,7 @@ class ActivityDAOTest{
 
                 //Act & Assert
                 assertEquals(3, activityDAO.getAll().size)
-                activityDAO.deleteActivityByUserId(3)
+                activityDAO.deleteByUserId(3)
                 assertEquals(3, activityDAO.getAll().size)
             }
         }
@@ -218,7 +218,7 @@ class ActivityDAOTest{
 
                 //Act & Assert
                 assertEquals(3, activityDAO.getAll().size)
-                activityDAO.deleteActivityByUserId(1)
+                activityDAO.deleteByUserId(1)
                 assertEquals(1, activityDAO.getAll().size)
             }
         }
