@@ -1,13 +1,7 @@
 package ie.setu.utils
 
-import ie.setu.domain.Activity
-import ie.setu.domain.FitnessGoal
-import ie.setu.domain.Trainee
-import ie.setu.domain.db.Users
-import ie.setu.domain.User
-import ie.setu.domain.db.Activities
-import ie.setu.domain.db.FitnessGoals
-import ie.setu.domain.db.Trainees
+import ie.setu.domain.*
+import ie.setu.domain.db.*
 import org.jetbrains.exposed.sql.ResultRow
 
 fun mapToUser (it: ResultRow) = User(
@@ -57,3 +51,12 @@ fun mapToTrainee(it: ResultRow) = Trainee(
     emergency_contacts_phone_number = it[Trainees.emergency_contacts_phone_number],
     emergency_contacts_relation = it[Trainees.emergency_contacts_relation]
 )
+
+fun mapToImage(it: ResultRow) = Image(
+    id = it[Images.id],
+    title = it[Images.title],
+    description = it[Images.description],
+    image_file_path = it[Images.image_file_path],
+    userId = it[Images.userId]
+)
+
