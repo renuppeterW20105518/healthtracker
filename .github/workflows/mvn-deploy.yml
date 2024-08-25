@@ -41,15 +41,27 @@ jobs:
       - name: Maven Verify
         run: mvn -B clean verify -Dmaven.test.failure.ignore=true
 
+  # deploy:
+  #   name: Railway Deploy
+  #   needs: test
+  #   runs-on: ubuntu-latest  
+
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - name: Checkout Repository
+        
+  #       run: npm i -g @railway/cli
+  #     - name: Deploy to Railway
+  #       run: railway up --service ${{ secrets.RAILWAY_SERVICE }}
+  #       env:
+  #         RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
   deploy:
     name: Railway Deploy
     needs: test
-    runs-on: ubuntu-latest  
-
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Checkout Repository
-        
+      - name: Install Railway
         run: npm i -g @railway/cli
       - name: Deploy to Railway
         run: railway up --service ${{ secrets.RAILWAY_SERVICE }}
