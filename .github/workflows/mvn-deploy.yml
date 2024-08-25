@@ -53,6 +53,6 @@ jobs:
       - name: Deploy to Railway
         uses: devtomio/action-railway@v1.1.4
         with:
-          service: <your-service-name>  # Specify your service name here
+          service: sparkling-rejoicing  # Specify your service name here
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
