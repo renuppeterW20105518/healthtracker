@@ -3,9 +3,8 @@ name: Deploy to Railway
 on: [push, pull_request]
 
 jobs:
-
   package:
-    name: Maven Package (no tests) 
+    name: Maven Package (no tests)
     runs-on: ubuntu-latest
 
     steps:
@@ -17,7 +16,8 @@ jobs:
           cache: 'maven'
       - name: Maven Package
         run: mvn -B clean package -DskipTests
-    test:
+
+  test:
     name: Maven Tests
     needs: package
     runs-on: ubuntu-latest
