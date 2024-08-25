@@ -47,12 +47,11 @@ jobs:
     runs-on: ubuntu-latest  
 
     steps:
+      - uses: actions/checkout@v3
       - name: Checkout Repository
-        uses: actions/checkout@v3
-
+        
+        run: npm i -g @railway/cli
       - name: Deploy to Railway
-        uses: devtomio/action-railway@v1.1.4
-        with:
-          service: sparkling-rejoicing  # Specify your service name here
+        run: railway up --service ${{ secrets.RAILWAY_SERVICE }}
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
