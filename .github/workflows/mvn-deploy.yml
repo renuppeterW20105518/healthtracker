@@ -30,21 +30,3 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
           cache: 'maven'
-      
-      # Adding a step to display the Maven version and settings for debugging
-      - name: Display Maven Version and Settings
-        run: |
-          mvn -v
-          mvn help:effective-settings
-
-      # Run Maven verify with detailed logging
-      - name: Maven Verify
-        run: mvn -B clean verify -DtrimStackTrace=false -X
-
-      # If you want to keep the test reports
-      - name: Archive Test Reports
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-reports
-          path: target/surefire-reports/*.xml
