@@ -54,3 +54,5 @@ jobs:
          uses: devtomio/action-railway@v1.1.4
          env:
            RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+         with: 
+           args: --service healthtracker
