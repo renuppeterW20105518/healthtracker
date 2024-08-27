@@ -47,12 +47,10 @@ jobs:
     runs-on: ubuntu-latest  
     
     steps:
-       - name: Checkout Repository
-         uses: actions/checkout@v3
-
+       - uses: actions/checkout@v3
+       - name: Install Railway
+         run: npm i -g @railway/cli
        - name: Deploy to Railway
-         uses: devtomio/action-railway@v1.1.4
+         run: railway up --service ${{ secrets.RAILWAY_TOKEN }}
          env:
            RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-         with: 
-           args: --service healthtracker
